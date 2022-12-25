@@ -1,48 +1,39 @@
 #!/usr/bin/env bash
-#is a challenge
-check_factor()
-{
-	if [ $# -ne 3 ];
-        then
-                args=("$@")
-                count=0
-                num2=1
-                for a in ${args[*]};
-                do
-                        if [ $count -gt 1 ];
-                        then
-                                num2=$(echo $a*$num2 | bc)
-                        fi
-                        count=$((count + 1))
-                done
-        else
-                num2=$3
-        fi
 
-        num1=$2
-        num=$(echo "$1" | tr ':' '=')
+# Function to check if a number is a factor of another number
+check_factor() {
+  # Check if three arguments were provided
+  if [ $# -ne 3 ]; then
+    # If not, multiply all arguments together
+    num2=1
+    for a in "$@"; do
+      num2=$((num2 * a))
+    done
+  else
+    num2=$3
+  fi
 
-        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
-	        if ((result == 1)); then
-		        numcp=$num1
-		        num1=$num2
-		        num2=$numcp
-                fi
+  num1=$2
 
-        echo "$num$num1*$num2"
+  # Swap num1 and num2 if num2 is greater than num1
+  if ((num2 > num1)); then
+    numcp=$num1
+    num1=$num2
+    num2=$numcp
+  fi
+
+  # Print the result in the required format
+  echo "$num1*$num2"
 }
 
-if [ $# -ne 1 ]
-then
-        echo 'Usage: rsa <file>'
-        exit 1
+# Check if a file was provided as an argument
+if [ $# -ne 1 ]; then
+  echo 'Usage: rsa <file>'
+  exit 1
 else
-
-        while read i
-        do
-
-                result=$(factor "$i")
-                check_factor $result
-
-        done < "$1"
+  # Read each line of the file and check if the numbers are factors of each other
+  while read line; do
+    result=$(check_factor $line)
+    echo "$result"
+  done < "$1"
 fi

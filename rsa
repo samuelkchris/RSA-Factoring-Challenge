@@ -13,8 +13,57 @@ find_prime_factors() {
     done
   done
   if [ $num -gt 2 ]; then
-    echo "$num"
+    if miller_rabin_primality_test "$num"; then
+      echo "$num"
+    else
+      for ((i=num-2; i>2; i-=2)); do
+        if miller_rabin_primality_test "$i"; then
+          echo "$i"
+          break
+        fi
+      done
+    fi
   fi
+}
+
+miller_rabin_primality_test() {
+  local num="$1"
+  local s=0
+  local d=$((num - 1))
+  while [ $((d % 2)) -eq 0 ]; do
+    s=$((s + 1))
+    d=$((d / 2))
+  done
+  for ((i=0; i<20; i++)); do
+    local a=$((RANDOM % (num - 3) + 2))
+    local x=$(powmod "$a" "$d" "$num")
+    if [ $x -eq 1 ] || [ $x -eq $((num - 1)) ]; then
+      continue
+    fi
+    for ((r=0; r<s; r++)); do
+      x=$((x * x % num))
+      if [ $x -eq $((num - 1)) ]; then
+        continue 2
+      fi
+    done
+    return 1
+  done
+  return 0
+}
+
+powmod() {
+  local base="$1"
+  local exponent="$2"
+  local modulus="$3"
+  local result=1
+  while [ $exponent -gt 0 ]; do
+    if [ $((exponent % 2)) -eq 1 ]; then
+      result=$((result * base % modulus))
+    fi
+    base=$((base * base % modulus))
+    exponent=$((exponent / 2))
+  done
+  echo "$result"
 }
 
 if [ $# -ne 1 ]
@@ -23,7 +72,3 @@ then
   exit 1
 else
   num=$(head -n 1 "$1")
-  sqrt=$(echo "sqrt($num)" | bc -l | awk '{print int($1+0.5)}')
-  prime_factors=$(find_prime_factors "$num")
-  echo "The prime factors of $num are: $prime_factors"
-fi

@@ -1,34 +1,19 @@
 #!/usr/bin/python3
 """factorize given set of numbers in a file to product of two small numbers"""
-import random
+import sys
 
 def factorize(n):
-    if n % 2 == 0:
-        return (2, n // 2)
+    # Find the smallest factor of n
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return (i, n // i)
+    return (n, 1)
 
-    x, c, y, m = random.randint(1, n - 1), random.randint(1, n - 1), random.randint(1, n - 1), 1
-    g, r, q = 1, 1, 1
-    while g == 1:
-        x = (x * x + c) % n
-        y = (y * y + c) % n
-        y = (y * y + c) % n
-        g = gcd(abs(x - y), n)
-        k += 1
-        if k % m == 0:
-            r = g
-            m *= 2
+# Read the input file
+with open(sys.argv[1], 'r') as f:
+    numbers = [int(line.strip()) for line in f]
 
-    if r == n:
-        while True:
-            ys = (y * y + c) % n
-            g = gcd(abs(x - ys), n)
-            if g > 1:
-                break
-        return g, n // g
-    else:
-        return r, n // r
-
-def gcd(a, b):
-    if b == 0:
-        return a
-    return gcd(b, a % b)
+# Factorize each number and print the result
+for n in numbers:
+    p, q = factorize(n)
+    print(f"{n}={p}*{q}")

@@ -1,17 +1,21 @@
+#/usr/bin/env python3
 import sys
 
-def factorize(n):
-    # Find the smallest factor of n
-    for i in range(2, int(n ** 0.5) + 1):
-        if n % i == 0:
-            return (i, n // i)
-    return (n, 1)
 
-# Read the input file
-with open(sys.argv[1], 'r') as f:
-    numbers = [int(line.strip()) for line in f]
+def primef(n):
+    if n <= 3:
+        return int(n)
+    if n % 2 == 0:
+        return 2
+    elif n % 3 == 0:
+        return 3
+    else:
+        for i in range(5, int((n)**0.5) + 1, 6):
+            if n % i == 0:
+                return int(i)
+            if n % (i + 2) == 0:
+                return primef(n/(i+2))
+    return int(n)
 
-# Factorize each number and print the result
-for n in numbers:
-    p, q = factorize(n)
-    print(f"{n}={p}*{q}")
+
+print(primef(int(sys.argv[1])))
